@@ -1,12 +1,23 @@
+import { supabase } from "./supabase.js";
+
 if (Notification.permission !== "granted") {
   Notification.requestPermission();
 }
 
-function render() {
+async function loadReservations() {
+  const { data } = await supabase
+    .from("reservations")
+    .select("*")
+    .order("time");
+
+  render(data || []);
+}
+
+function render(reservations) {
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  getReservations().forEach(r => {
+  reservations.forEach(r => {
     const card = document.createElement("div");
     card.className = "card";
 
@@ -32,35 +43,36 @@ function render() {
   });
 }
 
-function openNavigation(from, to) {
-  const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`;
-  window.open(url, "_blank");
-}
-
-function setStatus(id, status) {
-  let res = getReservations();
-
+async function setStatus(id, status) {
   if (status === "Voltooid") {
-    res = res.filter(r => r.id !== id);
-    saveReservations(res);
-    notify("Rit afgerond", "Rit is voltooid en verwijderd ✅");
-    render();
+    await supabase.from("reservations").delete().eq("id", id);
+    new Notification("Rit afgerond", { body: "Rit is voltooid ✅" });
     return;
   }
 
-  const r = res.find(x => x.id === id);
-  if (!r) return;
-
-  r.status = status;
-  saveReservations(res);
-
-  notify("Taxi onderweg", "Taxi is onderweg 🚕");
-  render();
+  await supabase
+    .from("reservations")
+    .update({ status })
+    .eq("id", id);
 }
 
-window.addEventListener("storage", () => {
-  notify("Nieuwe reservering", "Nieuwe rit binnengekomen 🚕");
-  render();
-});
+function openNavigation(from, to) {
+  const url =
+    `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}`;
+  window.open(url, "_blank");
+}
 
-render();
+/* 🔴 REALTIME LISTENER */
+supabase
+  .channel("realtime-reservations")
+  .on(
+    "postgres_changes",
+    { event: "*", schema: "public", table: "reservations" },
+    () => loadReservations()
+  )
+  .subscribe();
+
+window.setStatus = setStatus;
+window.openNavigation = openNavigation;
+
+loadReservations();
