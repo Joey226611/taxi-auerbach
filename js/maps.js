@@ -1,31 +1,33 @@
-let map, directionsService, directionsRenderer;
+let map, routeLayer;
 
 function initMap() {
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 52.3702, lng: 4.8952 },
-    zoom: 12,
-    disableDefaultUI: true
-  });
+  map = L.map("map").setView([52.37, 4.89], 12);
 
-  directionsService = new google.maps.DirectionsService();
-  directionsRenderer = new google.maps.DirectionsRenderer();
-  directionsRenderer.setMap(map);
-
-  const fromInput = document.getElementById("from");
-  const toInput = document.getElementById("to");
-
-  new google.maps.places.Autocomplete(fromInput, { types: ["address"] });
-  new google.maps.places.Autocomplete(toInput, { types: ["address"] });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(map);
 }
 
-function drawRoute(from, to) {
-  directionsService.route({
-    origin: from,
-    destination: to,
-    travelMode: "DRIVING"
-  }, (result, status) => {
-    if (status === "OK") {
-      directionsRenderer.setDirections(result);
-    }
-  });
+async function geocode(address) {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+  );
+  const data = await res.json();
+  return data[0];
+}
+
+async function drawRoute(from, to) {
+  const start = await geocode(from);
+  const end = await geocode(to);
+
+  if (!start || !end) return;
+
+  if (routeLayer) map.removeLayer(routeLayer);
+
+  routeLayer = L.polyline([
+    [start.lat, start.lon],
+    [end.lat, end.lon]
+  ], { color: "yellow" }).addTo(map);
+
+  map.fitBounds(routeLayer.getBounds());
 }
