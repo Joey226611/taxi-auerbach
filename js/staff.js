@@ -7,36 +7,45 @@ function render() {
   list.innerHTML = "";
 
   getReservations().forEach(r => {
-    const div = document.createElement("div");
-    div.className = "card";
+    const card = document.createElement("div");
+    card.className = "card";
 
-    div.innerHTML = `
+    card.innerHTML = `
       <b>${r.from} → ${r.to}</b><br>
       ⏰ ${new Date(r.time).toLocaleString()}<br>
       Status: ${r.status}
 
       <button onclick="setStatus(${r.id}, 'Onderweg')">Taxi onderweg</button>
-      <button class="secondary" onclick="setStatus(${r.id}, 'Voltooid')">Rit klaar</button>
+      <button class="secondary" onclick="setStatus(${r.id}, 'Voltooid')">Rit voltooid</button>
     `;
 
-    list.appendChild(div);
+    list.appendChild(card);
   });
 }
 
 function setStatus(id, status) {
-  const res = getReservations();
+  let res = getReservations();
+
+  if (status === "Voltooid") {
+    res = res.filter(r => r.id !== id);
+    saveReservations(res);
+    notify("Rit afgerond", "Rit voltooid en verwijderd ✅");
+    render();
+    return;
+  }
+
   const r = res.find(x => x.id === id);
   if (!r) return;
 
   r.status = status;
   saveReservations(res);
 
-  notify("Taxi status", `Rit is nu: ${status}`);
+  notify("Taxi onderweg", "Taxi is onderweg 🚕");
   render();
 }
 
 window.addEventListener("storage", () => {
-  notify("Nieuwe reservering", "Er is een nieuwe rit binnengekomen 🚕");
+  notify("Nieuwe reservering", "Nieuwe rit binnengekomen 🚕");
   render();
 });
 
