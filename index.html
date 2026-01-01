@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <title>Taxi Auerbach</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- Leaflet -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
 
@@ -25,11 +30,13 @@
   </div>
 </div>
 
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="js/data.js"></script>
-<script src="js/visitor.js"></script>
 <script src="js/maps.js"></script>
-<script async
-  src="https://maps.googleapis.com/maps/api/js?key=HIER_JE_API_KEY&libraries=places&callback=initMap">
+<script src="js/visitor.js"></script>
+
+<script>
+  initMap();
 </script>
 
 </body>
