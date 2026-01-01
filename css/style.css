@@ -1,7 +1,7 @@
 :root {
   --primary: #ffc400;
-  --dark: #111;
-  --card: #1c1c1c;
+  --dark: #0f0f0f;
+  --card: #1b1b1b;
 }
 
 * {
@@ -16,23 +16,23 @@ body {
 }
 
 header {
-  padding: 20px;
   background: black;
+  padding: 20px;
   text-align: center;
   font-size: 1.4rem;
   font-weight: bold;
 }
 
 .container {
-  padding: 20px;
   max-width: 600px;
   margin: auto;
+  padding: 20px;
 }
 
 .card {
   background: var(--card);
   padding: 20px;
-  border-radius: 14px;
+  border-radius: 16px;
   margin-bottom: 20px;
 }
 
@@ -40,30 +40,10 @@ input, button {
   width: 100%;
   padding: 14px;
   margin-top: 10px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   font-size: 1rem;
 }
 
 input {
-  background: #2a2a2a;
-  color: white;
-}
-
-button {
-  background: var(--primary);
-  color: black;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-button.secondary {
-  background: #333;
-  color: white;
-}
-
-.status {
-  margin-top: 10px;
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
+  background:
