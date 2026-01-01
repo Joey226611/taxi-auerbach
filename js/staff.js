@@ -15,12 +15,26 @@ function render() {
       ⏰ ${new Date(r.time).toLocaleString()}<br>
       Status: ${r.status}
 
-      <button onclick="setStatus(${r.id}, 'Onderweg')">Taxi onderweg</button>
-      <button class="secondary" onclick="setStatus(${r.id}, 'Voltooid')">Rit voltooid</button>
+      <button onclick="openNavigation('${r.from}','${r.to}')">
+        📍 Bekijk route
+      </button>
+
+      <button onclick="setStatus(${r.id}, 'Onderweg')">
+        Taxi onderweg
+      </button>
+
+      <button class="secondary" onclick="setStatus(${r.id}, 'Voltooid')">
+        Rit voltooid
+      </button>
     `;
 
     list.appendChild(card);
   });
+}
+
+function openNavigation(from, to) {
+  const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`;
+  window.open(url, "_blank");
 }
 
 function setStatus(id, status) {
@@ -29,7 +43,7 @@ function setStatus(id, status) {
   if (status === "Voltooid") {
     res = res.filter(r => r.id !== id);
     saveReservations(res);
-    notify("Rit afgerond", "Rit voltooid en verwijderd ✅");
+    notify("Rit afgerond", "Rit is voltooid en verwijderd ✅");
     render();
     return;
   }
