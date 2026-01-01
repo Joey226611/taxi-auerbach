@@ -9,8 +9,9 @@ function reserve() {
 
   if (!from || !to || !time) return;
 
-  const reservations = getReservations();
+  drawRoute(from, to);
 
+  const reservations = getReservations();
   reservations.push({
     id: Date.now(),
     from,
@@ -22,7 +23,6 @@ function reserve() {
   saveReservations(reservations);
 
   notify("Taxi Auerbach", "Je reservering is geplaatst 🚕");
-
   document.getElementById("status").innerText =
-    "Reservering verzonden. Wacht op bevestiging.";
+    "Reservering geplaatst. Wacht op bevestiging.";
 }
