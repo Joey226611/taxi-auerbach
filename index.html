@@ -14,16 +14,23 @@
   <div class="card">
     <h2>Taxi reserveren</h2>
 
-    <input id="from" placeholder="Ophaal straat">
+    <input id="from" placeholder="Ophaaladres">
     <input id="to" placeholder="Bestemming">
     <input id="time" type="datetime-local">
 
     <button onclick="reserve()">Reserveer taxi</button>
     <div class="status" id="status"></div>
+
+    <div id="map"></div>
   </div>
 </div>
 
 <script src="js/data.js"></script>
 <script src="js/visitor.js"></script>
+<script src="js/maps.js"></script>
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=HIER_JE_API_KEY&libraries=places&callback=initMap">
+</script>
+
 </body>
 </html>
