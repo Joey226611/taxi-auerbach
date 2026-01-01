@@ -1,18 +1,102 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <title>Taxi Auerbach – Staff</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard - Taxi Auerbach</title>
+    <link rel="stylesheet" href="css/staff.css">
 </head>
 <body>
+    <header>
+        <h1>Taxi Auerbach - Staff Dashboard</h1>
+    </header>
 
-<header>👨‍✈️ Staff dashboard</header>
+    <main>
+        <section id="reservations-section">
+            <h2>Huidige Reserveringen</h2>
+            <ul id="reservations-list">
+                <!-- Reserveringen komen hier -->
+            </ul>
+        </section>
+    </main>
 
-<div class="container" id="list"></div>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-<script src="js/data.js"></script>
-<script src="js/staff.js"></script>
+        // Supabase instellen
+        const supabaseUrl = 'https://whxdmxwxzvnsraygohfl.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoeGRteHd4enZuc3JheWdvaGZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyNzg3MjksImV4cCI6MjA4Mjg1NDcyOX0.Jt0hOkW4G2rkaqbSSGQXAfIjAHjRLn_7y1K7KUY955o';
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        const listEl = document.getElementById('reservations-list');
+
+        // Notificaties inschakelen
+        async function enableNotifications() {
+            if ('Notification' in window) {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') console.log('Notificaties toegestaan!');
+            }
+        }
+        enableNotifications();
+
+        // Haal reserveringen op
+        async function fetchReservations() {
+            const { data, error } = await supabase
+                .from('reservations')
+                .select('*')
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error('Fout bij ophalen:', error);
+                return;
+            }
+
+            listEl.innerHTML = '';
+
+            data.forEach(reservation => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${reservation.pickup}</strong> ➜ <strong>${reservation.destination}</strong>
+                    <br>Tijd: ${reservation.time}
+                    <br>
+                    <button class="done-btn" data-id="${reservation.id}">Voltooid</button>
+                    <button class="route-btn" data-pickup="${reservation.pickup}" data-destination="${reservation.destination}">Bekijk Route</button>
+                `;
+                listEl.appendChild(li);
+
+                // Push notification voor nieuwe reserveringen
+                new Notification('Nieuwe reservering!', {
+                    body: `${reservation.pickup} ➜ ${reservation.destination} om ${reservation.time}`
+                });
+            });
+
+            // Voeg event listeners toe voor knoppen
+            document.querySelectorAll('.done-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.dataset.id;
+                    await supabase
+                        .from('reservations')
+                        .delete()
+                        .eq('id', id);
+                    fetchReservations(); // refresh
+                });
+            });
+
+            document.querySelectorAll('.route-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const pickup = encodeURIComponent(e.target.dataset.pickup);
+                    const destination = encodeURIComponent(e.target.dataset.destination);
+                    
+                    // Openen in mobiele maps-app
+                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${pickup}&destination=${destination}`;
+                    window.location.href = mapsUrl;
+                });
+            });
+        }
+
+        // Polling elke 10 seconden voor nieuwe reserveringen
+        fetchReservations();
+        setInterval(fetchReservations, 10000);
+    </script>
 </body>
 </html>
