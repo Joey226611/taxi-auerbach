@@ -1,8 +1,10 @@
+import { supabase } from "./supabase.js";
+
 if (Notification.permission !== "granted") {
   Notification.requestPermission();
 }
 
-function reserve() {
+async function reserve() {
   const from = document.getElementById("from").value;
   const to = document.getElementById("to").value;
   const time = document.getElementById("time").value;
@@ -11,18 +13,19 @@ function reserve() {
 
   drawRoute(from, to);
 
-  const reservations = getReservations();
-  reservations.push({
-    id: Date.now(),
+  await supabase.from("reservations").insert([{
     from,
     to,
     time,
     status: "Ingepland"
+  }]);
+
+  new Notification("Taxi Auerbach", {
+    body: "Je reservering is geplaatst 🚕"
   });
 
-  saveReservations(reservations);
-
-  notify("Taxi Auerbach", "Je reservering is geplaatst 🚕");
   document.getElementById("status").innerText =
-    "Reservering geplaatst. Wacht op bevestiging.";
+    "Reservering verzonden. Staff ziet dit direct.";
 }
+
+window.reserve = reserve;
